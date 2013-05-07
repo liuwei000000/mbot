@@ -5,12 +5,11 @@ from dirbot.items import Website
 
 
 class DmozSpider(BaseSpider):
-    name = "dmoz"
-    allowed_domains = ["dmoz.org"]
-    start_urls = [
-        "http://www.dmoz.org/Computers/Programming/Languages/Python/Books/",
-        "http://www.dmoz.org/Computers/Programming/Languages/Python/Resources/",
-    ]
+    name = "douban"
+    allowed_domains = []
+    startYear = 2013
+    endYear = 1980
+    start_urls =  ['http://movie.douban.com/tag/'+str(i) for i in range(startYear, endYear,-1)]
 
     def parse(self, response):
         """
