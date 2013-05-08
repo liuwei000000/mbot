@@ -2,9 +2,10 @@
 
 SPIDER_MODULES = ['dirbot.spiders']
 NEWSPIDER_MODULE = 'dirbot.spiders'
-DEFAULT_ITEM_CLASS = 'dirbot.items.Website'
+DEFAULT_ITEM_CLASS = 'dirbot.items.MovieInfo'
 
 ITEM_PIPELINES = ['dirbot.pipelines.FilterWordsPipeline']
-DOWNLOAD_DELAY = 0.05
+DOWNLOAD_DELAY = 0.07
 HTTPCACHE_ENABLED = True
 HTTPCACHE_DIR = 'C:/scrapy-cache/filedbm'
+LOG_LEVEL = "INFO"

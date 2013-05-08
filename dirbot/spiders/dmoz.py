@@ -1,14 +1,19 @@
+# -*- coding: utf-8 -*-
 from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
+from scrapy.http import Request
 
-from dirbot.items import Website
+from dirbot.items import MovieInfo
 
+movie_link_xpath="//div[@class='pl2']/a/@href"      #search movie url
+this_page_num_xpath = "//span[@class='thispage']/text()"
 
 class DmozSpider(BaseSpider):
     name = "douban"
     allowed_domains = []
-    startYear = 2013
-    endYear = 1980
+    startYear = 1922
+    #endYear = 1980
+    endYear = 1921
     start_urls =  ['http://movie.douban.com/tag/'+str(i) for i in range(startYear, endYear,-1)]
 
     def parse(self, response):
@@ -16,18 +21,35 @@ class DmozSpider(BaseSpider):
         The lines below is a spider contract. For more info see:
         http://doc.scrapy.org/en/latest/topics/contracts.html
 
-        @url http://www.dmoz.org/Computers/Programming/Languages/Python/Resources/
         @scrapes name
         """
+
         hxs = HtmlXPathSelector(response)
-        sites = hxs.select('//ul[@class="directory-url"]/li')
-        items = []
+        if 'http://movie.douban.com/tag' in response.url:
+            """
+            from tag dir to movie url
+            """
+            #或者所有电影的链接
+            sites = hxs.select(movie_link_xpath).extract()
+            for site in sites:
+                yield Request(url=site, callback=self.parse_detail)
+        
+            #获取下一页的分类页面链接
+            thispage = hxs.select(this_page_num_xpath).extract()
+            if thispage != []:
+                next_url_xpath = "//div[@class='paginator']/a[text()>" + str(thispage[0]) + "]/@href"
+                next_url = hxs.select(next_url_xpath).extract() 
+                if next_url != []:
+                    yield Request(url=next_url[0], callback=self.parse)
 
-        for site in sites:
-            item = Website()
-            item['name'] = site.select('a/text()').extract()
-            item['url'] = site.select('a/@href').extract()
-            item['description'] = site.select('text()').re('-\s([^\n]*?)\\n')
-            items.append(item)
-
-        return items
+        
+    def parse_detail(self, response):
+       """
+       parse movie info
+       """
+       if 'http://movie.douban.com/subject' not in response.url:
+           return
+       
+       print "======" + response.url
+       yield MovieInfo()
+        
