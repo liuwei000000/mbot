@@ -14,6 +14,7 @@ class MovieInfo(Item):
     yuyan = Field()
     shangying_time = Field()
     pingfen = Field()
+    imgae_url = Field()
     imdb_url = Field()
     description = Field()
     

@@ -14,7 +14,19 @@ class DmozSpider(BaseSpider):
     startYear = 1922
     #endYear = 1980
     endYear = 1921
-    start_urls =  ['http://movie.douban.com/tag/'+str(i) for i in range(startYear, endYear,-1)]
+    #start_urls =  ['http://movie.douban.com/tag/'+str(i) for i in range(startYear, endYear,-1)]
+    start_urls =  ['http://movie.douban.com/subject/2127034/','http://movie.douban.com/subject/6021916/']    
+    allruls = [];
+
+    def creat_item(self, hxs, url):
+        item = MovieInfo()
+        item["douban_url"] = url
+        item["name"]= hxs.select("//h1/span/text()").extract()[0]
+        
+        infos = hxs.select("//div[@id='info']/child::*").extract()
+        #for info in 
+        
+        return item
 
     def parse(self, response):
         """
@@ -23,8 +35,12 @@ class DmozSpider(BaseSpider):
 
         @scrapes name
         """
-
+        
         hxs = HtmlXPathSelector(response)
+        if 'http://movie.douban.com/subject' in response.url:
+            print response.url
+            yield self.creat_item(hxs, response.url)
+        
         if 'http://movie.douban.com/tag' in response.url:
             """
             from tag dir to movie url
@@ -41,7 +57,6 @@ class DmozSpider(BaseSpider):
                 next_url = hxs.select(next_url_xpath).extract() 
                 if next_url != []:
                     yield Request(url=next_url[0], callback=self.parse)
-
         
     def parse_detail(self, response):
        """
@@ -50,6 +65,7 @@ class DmozSpider(BaseSpider):
        if 'http://movie.douban.com/subject' not in response.url:
            return
        
-       print "======" + response.url
-       yield MovieInfo()
+       hxs = HtmlXPathSelector(response)
+       print response.url
+       yield creat_item(hxs, response.url)
         
