@@ -22,9 +22,13 @@ class DmozSpider(BaseSpider):
         item = MovieInfo()
         item["douban_url"] = url
         item["name"]= hxs.select("//h1/span/text()").extract()[0]
+        infos = hxs.select("//div[@id='info']/span").extract()
+        item["daoyan"] = hxs.select(u"//*[text()='导演']/following-sibling::*/text()").extract()
+        item["bianju"] = hxs.select(u"//*[text()='编剧']/following-sibling::*/text()").extract()
+        item["zhuyan"] = hxs.select(u"//*[text()='主演']/following-sibling::*/text()").extract()
         
-        infos = hxs.select("//div[@id='info']/child::*").extract()
-        #for info in 
+        #hxs.select(u"//*[text()='类型:']/following-sibling::*")
+        
         
         return item
 
@@ -68,4 +72,4 @@ class DmozSpider(BaseSpider):
        hxs = HtmlXPathSelector(response)
        print response.url
        yield creat_item(hxs, response.url)
-        
+
