@@ -19,4 +19,16 @@ class MovieInfo(Item):
     imdb_url = Field()
     description = Field()
     
+    def pr(self):
+        print '==================================='
+        for k in self:
+            if isinstance(self[k], list):
+                print "%s :"% k,
+                for i in self[k]:
+                    print i,
+                print
+            else:
+                print "%s :"% k, self[k]
+        print '####################################'
+    
 
