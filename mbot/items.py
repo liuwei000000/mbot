@@ -2,7 +2,10 @@
 from scrapy.item import Item, Field
 
 class MovieInfo(Item):
-
+    """str2name = {\
+        "douban_url":u"豆瓣链接"，\
+        "name":u"名称" ,\
+                }"""
     douban_url = Field()
     name = Field()
     other_name = Field()
@@ -18,14 +21,15 @@ class MovieInfo(Item):
     imgae_url = Field()
     imdb_url = Field()
     description = Field()
+    ping_num = Field()
     
     def pr(self):
         print '==================================='
         for k in self:
             if isinstance(self[k], list):
-                print "%s :"% k,
+                print "%s :" % k,
                 for i in self[k]:
-                    print i,
+                    print i, ";" ,
                 print
             else:
                 print "%s :"% k, self[k]

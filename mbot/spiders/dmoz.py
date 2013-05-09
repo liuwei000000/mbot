@@ -2,8 +2,13 @@
 from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http import Request
-
 from mbot.items import MovieInfo
+
+import sqlite3
+from os import path
+from scrapy import signals
+from scrapy.xlib.pydispatch import dispatcher
+import re
 
 movie_link_xpath="//div[@class='pl2']/a/@href"      #search movie url
 this_page_num_xpath = "//span[@class='thispage']/text()"
@@ -16,7 +21,22 @@ class DmozSpider(BaseSpider):
     endYear = 1921
     #start_urls =  ['http://movie.douban.com/tag/'+str(i) for i in range(startYear, endYear,-1)]
     start_urls =  ['http://movie.douban.com/subject/2127034/','http://movie.douban.com/subject/6021916/']    
-    allruls = [];
+    allruls = [];    
+    filename = 'data.db'
+ 
+    def __init__(self):
+        self.conn = None
+        dispatcher.connect(self.initialize, signals.engine_started)
+        dispatcher.connect(self.finalize, signals.engine_stopped)
+        
+    def initialize(self):
+        self.conn = sqlite3.connect(self.filename)
+ 
+    def finalize(self):
+        if self.conn is not None:
+            self.conn.commit()
+            self.conn.close()
+            self.conn = None
 
     def creat_item(self, hxs, url):
         item = MovieInfo()
@@ -34,25 +54,28 @@ class DmozSpider(BaseSpider):
         item["yuyan"] = hxs.select(u"//div[@id='info']").re(u'语言:</span>([^<]*)')[0]
         item["date"] = hxs.select(u"//div[@id='info']/span[@property='v:initialReleaseDate']/@content").extract()[0]
         item["runtime"] = hxs.select(u"//div[@id='info']/span[@property='v:runtime']/@content").extract()[0]
+        item["pingfen"] = hxs.select(u"//strong[@property='v:average']/text()").extract()[0]
+        item["ping_num"] = hxs.select(u"//span[@property='v:votes']/text()").extract()[0]
+         
+        item["other_name"] = []
+        result = re.match("([^A-Za-z ]*) (.*)", item["name"])
+        if result and result.groups() >= 2:
+            item["other_name"].append(result.groups()[0])
+            item["other_name"].append(result.groups()[1])
         names_list = hxs.select(u"//div[@id='info']").re(u'又名:</span>([^<]*)')
         #处理多个名字
-        if names_list :
+        if names_list :   
             names = names_list[0]
             names = names.replace(u"(港)", "")
             names = names.replace(u"(台)", "")
-            item["other_name"] = names.split(" / ")
+            item["other_name"].extend(names.split(" / "))
         
         disp = hxs.select(u"//span[@property='v:summary']").extract()
         if disp :
             item["description"] = disp[0]
         disp = hxs.select(u"//span[@class='all hidden']").extract()
         if disp :
-            item["description"] = disp[0]
-        #item["other_name"] = [item["name"], ]
-        
-        #hxs.select(u"//*[text()='类型:']/following-sibling::*")
-        
-        
+            item["description"] = disp[0]       
         return item
 
     def parse(self, response):
@@ -79,10 +102,10 @@ class DmozSpider(BaseSpider):
         
             #获取下一页的分类页面链接
             thispage = hxs.select(this_page_num_xpath).extract()
-            if thispage != []:
+            if thispage:
                 next_url_xpath = "//div[@class='paginator']/a[text()>" + str(thispage[0]) + "]/@href"
                 next_url = hxs.select(next_url_xpath).extract() 
-                if next_url != []:
+                if next_url:
                     yield Request(url=next_url[0], callback=self.parse)
         
     def parse_detail(self, response):
