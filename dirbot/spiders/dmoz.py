@@ -9,7 +9,7 @@ movie_link_xpath="//div[@class='pl2']/a/@href"      #search movie url
 this_page_num_xpath = "//span[@class='thispage']/text()"
 
 class DmozSpider(BaseSpider):
-    name = "douban"
+    name = "db"
     allowed_domains = []
     startYear = 1922
     #endYear = 1980
