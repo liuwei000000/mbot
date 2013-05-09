@@ -21,11 +21,34 @@ class DmozSpider(BaseSpider):
     def creat_item(self, hxs, url):
         item = MovieInfo()
         item["douban_url"] = url
-        item["name"]= hxs.select("//h1/span/text()").extract()[0]
-        infos = hxs.select("//div[@id='info']/span").extract()
+        item["name"] = hxs.select("//h1/span/text()").extract()[0]
+        item["imgae_url"] = hxs.select(u"//div[@id='mainpic']//img/@src").extract()[0]
+        #infos = hxs.select("//div[@id='info']/span").extract()
         item["daoyan"] = hxs.select(u"//*[text()='导演']/following-sibling::*/text()").extract()
         item["bianju"] = hxs.select(u"//*[text()='编剧']/following-sibling::*/text()").extract()
         item["zhuyan"] = hxs.select(u"//*[text()='主演']/following-sibling::*/text()").extract()
+        item["leixing"] = hxs.select(u"//*[@id='info']/* \
+        [position() > (count(//*[text()='类型:']/preceding-sibling::*) + 1) and \
+        position() < count(//*[text()='类型:']/following-sibling::br[1]/preceding-sibling::*)+1 ]/text()").extract()
+        item["quyu"] = hxs.select(u"//div[@id='info']").re(u'制片国家/地区:</span>([^<]*)')[0]
+        item["yuyan"] = hxs.select(u"//div[@id='info']").re(u'语言:</span>([^<]*)')[0]
+        item["date"] = hxs.select(u"//div[@id='info']/span[@property='v:initialReleaseDate']/@content").extract()[0]
+        item["runtime"] = hxs.select(u"//div[@id='info']/span[@property='v:runtime']/@content").extract()[0]
+        names_list = hxs.select(u"//div[@id='info']").re(u'又名:</span>([^<]*)')
+        #处理多个名字
+        if names_list :
+            names = names_list[0]
+            names = names.replace(u"(港)", "")
+            names = names.replace(u"(台)", "")
+            item["other_name"] = names.split(" / ")
+        
+        disp = hxs.select(u"//span[@property='v:summary']").extract()
+        if disp :
+            item["description"] = disp[0]
+        disp = hxs.select(u"//span[@class='all hidden']").extract()
+        if disp :
+            item["description"] = disp[0]
+        #item["other_name"] = [item["name"], ]
         
         #hxs.select(u"//*[text()='类型:']/following-sibling::*")
         

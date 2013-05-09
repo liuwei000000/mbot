@@ -10,6 +10,14 @@ class SQLiteStorePipeline(object):
     def process_item(self, item, spider):
         print '==================================='
         for k in item:
-            print "%s :"% k, item[k]
+            if isinstance(item[k], list):
+                print "%s :"% k,
+                for i in item[k]:
+                    print i,
+                print
+            else:
+                print "%s :"% k, item[k]
         print '####################################'
+        
+        
         return item
