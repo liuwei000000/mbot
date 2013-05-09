@@ -3,7 +3,7 @@ from scrapy.spider import BaseSpider
 from scrapy.selector import HtmlXPathSelector
 from scrapy.http import Request
 
-from dirbot.items import MovieInfo
+from mbot.items import MovieInfo
 
 movie_link_xpath="//div[@class='pl2']/a/@href"      #search movie url
 this_page_num_xpath = "//span[@class='thispage']/text()"
