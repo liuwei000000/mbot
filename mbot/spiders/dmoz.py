@@ -78,6 +78,7 @@ class DmozSpider(BaseSpider):
             names = names.replace(u"(台)", "")
             item["other_name"].extend(names.split(" / "))
         
+        item["description"] = ""
         disp = hxs.select(u"//span[@property='v:summary']").extract()
         if disp :
             item["description"] = disp[0]
