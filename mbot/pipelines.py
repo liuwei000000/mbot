@@ -33,14 +33,18 @@ class SQLiteStorePipeline(object):
 
     def sql_dianying_yinren(self, dianying_id, list_yingren):
         for item in list_yingren:
-            x = conn.execute(u'select "演员id" from "演员id-姓名" where "姓名"%s";' % item).fetchone()
+            x = self.conn.execute(u'select "演员id" from "演员id-姓名" where "姓名"="%s";' % item).fetchone()
             if x:
-                pass
+                self.conn.execute(u'insert "演员id" from "演员id-姓名" where "姓名"%s";' % x[0])
+                self.conn.commit()
+            else:
+                pass            
             
     def insert_dianying(self, item):
         self.conn.execute(u'insert into 电影信息(名称,豆瓣链接,发行地区,语言,描述,封面链接,上映日期,时长,评分,评分人数) \
           values(?,?,?,?,?,?,?,?,?,?)',(item["name"], item["douban_url"], item["quyu"], item["yuyan"], item["description"],\
                                           item["imgae_url"], item["date"], item["runtime"], item["pingfen"], item["ping_num"])).fetchone()
+        self.conn.commit()
         x = self.conn.execute("select last_insert_rowid()").fetchone()
         if x:
             return x[0]
