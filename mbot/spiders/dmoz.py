@@ -19,7 +19,7 @@ class DmozSpider(BaseSpider):
     startYear = 2013
     #endYear = 1980
     endYear = 2000
-    start_urls = ['http://movie.douban.com/tag/2013']
+    start_urls = ['http://movie.douban.com/subject/1300530']
     #start_urls =  ['http://movie.douban.com/tag/'+str(i) for i in range(startYear, endYear,-1)]
     #start_urls =  ['http://movie.douban.com/subject/2127034/','http://movie.douban.com/subject/6021916/']    
     allruls = []; 
@@ -93,7 +93,7 @@ class DmozSpider(BaseSpider):
 
         @scrapes name
         """
-        print response.url
+        
         hxs = HtmlXPathSelector(response)
         if 'http://movie.douban.com/subject' in response.url:
             print response.url
