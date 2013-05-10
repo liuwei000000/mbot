@@ -31,19 +31,24 @@ class SQLiteStorePipeline(object):
         #conn.commit()
         return conn
 
-    def sql_dianying_yinren(self, dianying_id, list_yingren):
-        for item in list_yingren:
-            x = self.conn.execute(u'select "演员id" from "演员id-姓名" where "姓名"="%s";' % item).fetchone()
-            if x:
-                self.conn.execute(u'insert "演员id" from "演员id-姓名" where "姓名"%s";' % x[0])
+    def sql_person(self, dianying_id, list_person, table_guanxi, t1, t2):
+        for item in list_person:
+            id = "";
+            x = self.conn.execute(u'select "id" from "影人信息" where "姓名"="%s";' % item).fetchone()
+            if not x:
+                self.conn.execute(u'insert into 影人信息(姓名)  values("%s")' % (item))
                 self.conn.commit()
+                id = self.conn.execute("select last_insert_rowid()").fetchone()[0]
             else:
-                pass            
+                id = x[0]
+            self.conn.execute(u'insert into "%s"(%s,%s) values("%s","%s")' % (table_guanxi, t1, t2, dianying_id, id))
+            self.conn.commit()
+         
             
     def insert_dianying(self, item):
         self.conn.execute(u'insert into 电影信息(名称,豆瓣链接,发行地区,语言,描述,封面链接,上映日期,时长,评分,评分人数) \
           values(?,?,?,?,?,?,?,?,?,?)',(item["name"], item["douban_url"], item["quyu"], item["yuyan"], item["description"],\
-                                          item["imgae_url"], item["date"], item["runtime"], item["pingfen"], item["ping_num"])).fetchone()
+                                          item["imgae_url"], item["date"], item["runtime"], item["pingfen"], item["ping_num"]))
         self.conn.commit()
         x = self.conn.execute("select last_insert_rowid()").fetchone()
         if x:
@@ -56,6 +61,9 @@ class SQLiteStorePipeline(object):
         item.pr()
         dianying_id = self.insert_dianying(item)
         #处理影人
+        self.sql_person(dianying_id, item["zhuyan"], u"电影id-演员id", u"电影id", u"演员id")
+        self.sql_person(dianying_id, item["daoyan"], u"电影id-导演id", u"电影id", u"导演id")
+        self.sql_person(dianying_id, item["bianju"], u"电影id-编剧id", u"电影id", u"编剧id")
         
         #
         
@@ -82,41 +90,36 @@ CREATE INDEX [豆瓣链接索引] ON "电影信息" ([豆瓣链接]);
 
 CREATE TABLE "别名-电影id" (
   [电影名称] VARCHAR(256) NOT NULL, 
-  [电影id] BIGINT NOT NULL REFERENCES [电影信息]([id]));
+  [电影id] INTEGER NOT NULL REFERENCES [电影信息]([id]));
 
 CREATE INDEX [电影名称索引] ON "别名-电影id" ([电影名称]);
 
 
 CREATE TABLE "影人信息" (
   [id] INTEGER PRIMARY KEY AUTOINCREMENT, 
+  [姓名] VARCHAR(256) NOT NULL, 
   [出生年月] DATE);
-
-
-CREATE TABLE "演员id-姓名" (
-  [演员id] BIGINT NOT NULL REFERENCES "影人信息"([id]), 
-  [姓名] VARCHAR(256) NOT NULL);
-
-CREATE INDEX [姓名索引] ON "演员id-姓名" ([姓名]);
-
+  
+CREATE INDEX [影人姓名索引] ON "影人信息" ([姓名]);
 
 CREATE TABLE "电影id-导演id" (
-  [电影id] BIGINT REFERENCES [电影信息]([id]) NOT NULL, 
-  [导演id] BIGINT REFERENCES [影人信息]([id]) NOT NULL);
+  [电影id] INTEGER REFERENCES [电影信息]([id]) NOT NULL, 
+  [导演id] INTEGER REFERENCES [影人信息]([id]) NOT NULL);
 
 
 CREATE TABLE "电影id-演员id" (
-  [电影id] BIGINT REFERENCES "电影信息"([id]) NOT NULL, 
-  [演员id] BIGINT REFERENCES "影人信息"([id]) NOT NULL);
+  [电影id] INTEGER REFERENCES "电影信息"([id]) NOT NULL, 
+  [演员id] INTEGER REFERENCES "影人信息"([id]) NOT NULL);
 
 
 CREATE TABLE "电影id-编剧id" (
-  [电影id] BIGINT REFERENCES [电影信息]([id]) NOT NULL, 
-  [编剧id] BIGINT REFERENCES [影人信息]([id]) NOT NULL);
+  [电影id] INTEGER REFERENCES [电影信息]([id]) NOT NULL, 
+  [编剧id] INTEGER REFERENCES [影人信息]([id]) NOT NULL);
 
 
 CREATE TABLE "类型-电影id" (
   [类型] VARCHAR(64) NOT NULL, 
-  [电影id] BIGINT NOT NULL REFERENCES [电影信息]([id]));
+  [电影id] INTEGER NOT NULL REFERENCES [电影信息]([id]));
 
 CREATE INDEX [类型索引] ON "类型-电影id" ([类型]);
 
