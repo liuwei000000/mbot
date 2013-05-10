@@ -22,7 +22,7 @@ class DmozSpider(BaseSpider):
     #start_urls =  ['http://movie.douban.com/tag/'+str(i) for i in range(startYear, endYear,-1)]
     start_urls =  ['http://movie.douban.com/subject/2127034/','http://movie.douban.com/subject/6021916/']    
     allruls = [];    
-    filename = 'data.db'
+    filename = '-data.db'
  
     def __init__(self):
         self.conn = None
