@@ -58,7 +58,7 @@ class SQLiteStorePipeline(object):
         
 
     def process_item(self, item, spider):
-        item.pr()
+        #item.pr()
         dianying_id = self.insert_dianying(item)
         #处理影人
         self.sql_person(dianying_id, item["zhuyan"], u"电影id-演员id", u"电影id", u"演员id")

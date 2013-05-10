@@ -29,10 +29,10 @@ class MovieInfo(Item):
             if isinstance(self[k], list):
                 print "%s :" % k,
                 for i in self[k]:
-                    print i, ";" ,
+                    print i.encode('gb18030'), ";" ,
                 print
             else:
-                print "%s :"% k, self[k]
+                print "%s :"% k, self[k].encode('gb18030')
         print '####################################'
     
 

@@ -16,9 +16,9 @@ this_page_num_xpath = "//span[@class='thispage']/text()"
 class DmozSpider(BaseSpider):
     name = "db"
     allowed_domains = []
-    startYear = 1922
+    startYear = 2013
     #endYear = 1980
-    endYear = 1921
+    endYear = 2000
     #start_urls =  ['http://movie.douban.com/tag/'+str(i) for i in range(startYear, endYear,-1)]
     start_urls =  ['http://movie.douban.com/subject/2127034/','http://movie.douban.com/subject/6021916/']    
     allruls = [];    
@@ -38,6 +38,12 @@ class DmozSpider(BaseSpider):
             self.conn.close()
             self.conn = None
 
+    def set_item(self, i, s, v):
+        if v:
+            i[s] = v[0]
+        else:
+            i[s] = ""
+
     def creat_item(self, hxs, url):
         item = MovieInfo()
         item["douban_url"] = url
@@ -50,12 +56,12 @@ class DmozSpider(BaseSpider):
         item["leixing"] = hxs.select(u"//*[@id='info']/* \
         [position() > (count(//*[text()='类型:']/preceding-sibling::*) + 1) and \
         position() < count(//*[text()='类型:']/following-sibling::br[1]/preceding-sibling::*)+1 ]/text()").extract()
-        item["quyu"] = hxs.select(u"//div[@id='info']").re(u'制片国家/地区:</span>([^<]*)')[0]
-        item["yuyan"] = hxs.select(u"//div[@id='info']").re(u'语言:</span>([^<]*)')[0]
-        item["date"] = hxs.select(u"//div[@id='info']/span[@property='v:initialReleaseDate']/@content").extract()[0]
-        item["runtime"] = hxs.select(u"//div[@id='info']/span[@property='v:runtime']/@content").extract()[0]
-        item["pingfen"] = hxs.select(u"//strong[@property='v:average']/text()").extract()[0]
-        item["ping_num"] = hxs.select(u"//span[@property='v:votes']/text()").extract()[0]
+        self.set_item(item, "quyu", hxs.select(u"//div[@id='info']").re(u'制片国家/地区:</span>([^<]*)'))
+        self.set_item(item, "yuyan", hxs.select(u"//div[@id='info']").re(u'语言:</span>([^<]*)'))
+        self.set_item(item, "date", hxs.select(u"//div[@id='info']/span[@property='v:initialReleaseDate']/@content").extract())
+        self.set_item(item, "runtime", hxs.select(u"//div[@id='info']/span[@property='v:runtime']/@content").extract())
+        self.set_item(item, "pingfen", hxs.select(u"//strong[@property='v:average']/text()").extract())
+        self.set_item(item, "ping_num", hxs.select(u"//span[@property='v:votes']/text()").extract())
          
         item["other_name"] = []
         result = re.match("([^A-Za-z ]*) (.*)", item["name"])
