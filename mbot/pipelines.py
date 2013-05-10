@@ -75,9 +75,6 @@ CREATE TABLE "电影信息" (
 
 CREATE INDEX [豆瓣链接索引] ON "电影信息" ([豆瓣链接]);
 
-CREATE TABLE "影人信息" (
-  [id] INTEGER PRIMARY KEY AUTOINCREMENT, 
-  [出生年月] DATE);
 
 CREATE TABLE "别名-电影id" (
   [电影名称] VARCHAR(256) NOT NULL, 
@@ -85,11 +82,18 @@ CREATE TABLE "别名-电影id" (
 
 CREATE INDEX [电影名称索引] ON "别名-电影id" ([电影名称]);
 
+
+CREATE TABLE "影人信息" (
+  [id] INTEGER PRIMARY KEY AUTOINCREMENT, 
+  [出生年月] DATE);
+
+
 CREATE TABLE "演员id-姓名" (
   [演员id] BIGINT NOT NULL REFERENCES "影人信息"([id]), 
   [姓名] VARCHAR(256) NOT NULL);
 
 CREATE INDEX [姓名索引] ON "演员id-姓名" ([姓名]);
+
 
 CREATE TABLE "电影id-导演id" (
   [电影id] BIGINT REFERENCES [电影信息]([id]) NOT NULL, 
