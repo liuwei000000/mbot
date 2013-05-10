@@ -5,7 +5,7 @@ NEWSPIDER_MODULE = 'mbot.spiders'
 DEFAULT_ITEM_CLASS = 'mbot.items.MovieInfo'
 
 ITEM_PIPELINES = ['mbot.pipelines.SQLiteStorePipeline']
-DOWNLOAD_DELAY = 0.07
+DOWNLOAD_DELAY = 0.03
 HTTPCACHE_ENABLED = True
 HTTPCACHE_DIR = 'scrapy-cache'
 LOG_LEVEL = "INFO"
