@@ -30,11 +30,16 @@ class SQLiteStorePipeline(object):
         #conn.execute(u"create table moive( id int identity(1, 1) not null primary key, 名字  text, 导演  text, 豆瓣链接  text, 描述  text)")
         #conn.commit()
         return conn
+    
+    def do_multi_info(self, dianying_id, list_info, table, t):
+        for info in list_info:
+            self.conn.execute(u'insert into "%s"("%s", 电影id)  values("%s", "%s")' % (table, t, info, dianying_id))
+            self.conn.commit()        
 
     def sql_person(self, dianying_id, list_person, table_guanxi, t1, t2):
         for item in list_person:
             id = "";
-            x = self.conn.execute(u'select "id" from "影人信息" where "姓名"="%s";' % item).fetchone()
+            x = self.conn.execute(u'select "id" from "影人信息" where "姓名"="%s"' % item).fetchone()
             if not x:
                 self.conn.execute(u'insert into 影人信息(姓名)  values("%s")' % (item))
                 self.conn.commit()
@@ -58,6 +63,9 @@ class SQLiteStorePipeline(object):
         
 
     def process_item(self, item, spider):
+        if self.conn.execute(u'select * from "电影信息" where "豆瓣链接"="%s";' % item["douban_url"]).fetchone():
+            print "Exsit!"
+            return item
         #item.pr()
         dianying_id = self.insert_dianying(item)
         #处理影人
@@ -65,8 +73,9 @@ class SQLiteStorePipeline(object):
         self.sql_person(dianying_id, item["daoyan"], u"电影id-导演id", u"电影id", u"导演id")
         self.sql_person(dianying_id, item["bianju"], u"电影id-编剧id", u"电影id", u"编剧id")
         
-        #
-        
+        #处理别名类型
+        self.do_multi_info(dianying_id, item["leixing"], u"类型-电影id", u"类型")
+        self.do_multi_info(dianying_id, item["other_name"], u"别名-电影id", u"电影名称")
         
         return item
 

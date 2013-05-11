@@ -18,7 +18,7 @@ class DmozSpider(BaseSpider):
     allowed_domains = []
     startYear = 2013
     #endYear = 1980
-    endYear = 2000
+    endYear = 2012
     start_urls = ['http://movie.douban.com/subject/1300530']
     #start_urls =  ['http://movie.douban.com/tag/'+str(i) for i in range(startYear, endYear,-1)]
     #start_urls =  ['http://movie.douban.com/subject/2127034/','http://movie.douban.com/subject/6021916/']    
@@ -26,7 +26,6 @@ class DmozSpider(BaseSpider):
     filename = '-data.db'
  
     def __init__(self):
-        print "__init__"
         self.conn = None
         dispatcher.connect(self.initialize, signals.engine_started)
         dispatcher.connect(self.finalize, signals.engine_stopped)
@@ -107,7 +106,10 @@ class DmozSpider(BaseSpider):
             #或者所有电影的链接
             sites = hxs.select(movie_link_xpath).extract()
             for site in sites:
-                yield Request(url=site, callback=self.parse_detail)
+                if not self.conn.execute(u'select * from "电影信息" where "豆瓣链接"="%s";' % site).fetchone():
+                    yield Request(url=site, callback=self.parse_detail)
+                else:
+                    print "Exsit!"
         
             #获取下一页的分类页面链接
             thispage = hxs.select(this_page_num_xpath).extract()
