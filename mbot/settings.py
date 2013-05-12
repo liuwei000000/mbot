@@ -6,12 +6,24 @@ DEFAULT_ITEM_CLASS = 'mbot.items.MovieInfo'
 
 ITEM_PIPELINES = ['mbot.pipelines.SQLiteStorePipeline']
 RANDOMIZE_DOWNLOAD_DELAY = True
-DOWNLOAD_DELAY = 0.05
-#HTTPCACHE_ENABLED = True
-#HTTPCACHE_DIR = 'scrapy-cache'
+DOWNLOAD_DELAY = 1
+CONCURRENT_ITEMS = 100
+CONCURRENT_REQUESTS = 16
+DNSCACHE_ENABLED = True
+
+HTTPCACHE_ENABLED = True
+HTTPCACHE_DIR = 'scrapy-cache'
 LOG_LEVEL = "INFO"
 DOWNLOAD_TIMEOUT = 5
 USER_AGENT = u"Mozilla/5.0 (Windows NT 5.1; rv:20.0) Gecko/20100101 Firefox/20.0"
+COOKIES_DEBUG = True
+
+DOWNLOADER_MIDDLEWARES = {
+    'mbot.middlewares.DBDownloaderMiddleware': 700,
+    'scrapy.contrib.downloadermiddleware.cookies.CookiesMiddleware' : None
+#    'scrapy.contrib.downloadermiddleware.defaultheaders.DefaultHeadersMiddleware': None,
+    #'scrapy.contrib.downloadermiddleware.cookies.CookiesMiddleware': None,
+}
 
 """
 DEFAULT_REQUEST_HEADERS = {
