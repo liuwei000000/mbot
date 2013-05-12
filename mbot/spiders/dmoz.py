@@ -93,11 +93,9 @@ class DmozSpider(BaseSpider):
 
         @scrapes name
         """
-        
-        print response.url
+        print response.url ,
         hxs = HtmlXPathSelector(response)
         if 'http://movie.douban.com/subject' in response.url:
-            print response.url
             yield self.creat_item(hxs, response.url)
         
         if 'http://movie.douban.com/tag' in response.url:
@@ -114,21 +112,25 @@ class DmozSpider(BaseSpider):
                     print "Exsit!"
         
             #获取下一页的分类页面链接
-            """thispage = hxs.select(this_page_num_xpath).extract()
+            thispage = hxs.select(this_page_num_xpath).extract()
             if thispage:
                 next_url_xpath = "//div[@class='paginator']/a[text()>" + str(thispage[0]) + "]/@href"
                 next_url = hxs.select(next_url_xpath).extract() 
                 if next_url:
-                    yield Request(url=next_url[0], callback=self.parse)"""
+                    yield Request(url=next_url[0], callback=self.parse)
         
     def parse_detail(self, response):
-       """
-       parse movie info
-       """
-       if 'http://movie.douban.com/subject' not in response.url:
-           return
+        return
+        """
+        parse movie info
+        """
+        if 'http://movie.douban.com/subject' not in response.url:
+            print "Exist"
+            return
+        else:
+            print
        
-       hxs = HtmlXPathSelector(response)
-       print response.url
-       yield self.creat_item(hxs, response.url)
+        hxs = HtmlXPathSelector(response)
+        print response.url
+        yield self.creat_item(hxs, response.url)
 
