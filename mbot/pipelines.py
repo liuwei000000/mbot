@@ -31,28 +31,33 @@ class SQLiteStorePipeline(object):
         #conn.commit()
         return conn
     
+    def str2sql(self, s):
+        return s.replace("/", "//").replace("'", "''").replace("[", "/[").replace("]", "/]").replace("%", "/%").replace("&","/&").replace("_", "/_").replace("(", "/(").replace(")", "/)")
+    
     def do_multi_info(self, dianying_id, list_info, table, t):
         for info in list_info:
-            self.conn.execute(u'insert into "%s"("%s", 电影id)  values("%s", "%s")' % (table, t, info, dianying_id))
+            info = self.str2sql(info)
+            self.conn.execute(u"""insert into '%s'('%s', 电影id)  values('%s', '%s')""" % (table, t, info, dianying_id))
             self.conn.commit()        
 
     def sql_person(self, dianying_id, list_person, table_guanxi, t1, t2):
         for item in list_person:
             id = "";
-            x = self.conn.execute(u'select "id" from "影人信息" where "姓名"="%s"' % item).fetchone()
+            item = self.str2sql(item)
+            x = self.conn.execute(u"""select 'id' from '影人信息' where '姓名'='%s'""" % item).fetchone()
             if not x:
-                self.conn.execute(u'insert into 影人信息(姓名)  values("%s")' % (item))
+                self.conn.execute(u"""insert into 影人信息(姓名)  values('%s')""" % (item))
                 self.conn.commit()
                 id = self.conn.execute("select last_insert_rowid()").fetchone()[0]
             else:
                 id = x[0]
-            self.conn.execute(u'insert into "%s"(%s,%s) values("%s","%s")' % (table_guanxi, t1, t2, dianying_id, id))
+            self.conn.execute(u"""insert into '%s'(%s,%s) values('%s','%s')""" % (table_guanxi, t1, t2, dianying_id, id))
             self.conn.commit()
          
             
     def insert_dianying(self, item):
-        self.conn.execute(u'insert into 电影信息(名称,豆瓣链接,发行地区,语言,描述,封面链接,上映日期,时长,评分,评分人数) \
-          values(?,?,?,?,?,?,?,?,?,?)',(item["name"], item["douban_url"], item["quyu"], item["yuyan"], item["description"],\
+        self.conn.execute(u"""insert into 电影信息(名称,豆瓣链接,发行地区,语言,描述,封面链接,上映日期,时长,评分,评分人数) \
+          values(?,?,?,?,?,?,?,?,?,?)""",(item["name"], item["douban_url"], item["quyu"], item["yuyan"], item["description"],\
                                           item["imgae_url"], item["date"], item["runtime"], item["pingfen"], item["ping_num"]))
         self.conn.commit()
         x = self.conn.execute("select last_insert_rowid()").fetchone()
